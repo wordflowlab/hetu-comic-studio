@@ -120,12 +120,13 @@ test("真实Electron审阅、专业操作、导出、冲突保留与关闭重开
         fullPage: true,
       });
     }
-    const tab = async (index: number) =>
-      page
-        .getByRole("navigation", { name: "专业视图" })
-        .getByRole("button", { name: config.tabs[index], exact: true })
-        .click();
-    await tab(0);await page.getByRole("button",{name:"阅读此页漫画",exact:true}).click();const comic=page.frameLocator("iframe[title='固定漫画阅读']");await expect(comic.locator("img")).toHaveCount(2);await expect(comic.locator(".balloon")).toContainText("为什么没有署名");expect(await comic.locator("img").first().evaluate((e:any)=>e.complete&&e.naturalWidth>100)).toBe(true);await page.getByRole("button",{name:"导出离线漫画",exact:true}).click();await expect(page.getByRole("status")).toContainText("已按固定修订导出",{timeout:120000});const file=(await readdir(exports)).find(f=>f.endsWith(".html"))!;expect(await readFile(path.join(exports,file),"utf8")).toContain("data:image/png;base64");await tab(2);await page.getByRole("button",{name:"检查阅读顺序与缺图",exact:true}).click();await expect(page.getByLabel("固定依据")).toContainText("明确阅读顺序");
+    const tab = async (index: number) => {
+      await page.bringToFront();
+      const button=page.getByRole("navigation",{name:"专业视图"}).getByRole("button",{name:config.tabs[index],exact:true});
+      await button.focus();await expect(button).toBeFocused();await button.click();
+      await expect(button).toHaveAttribute("aria-current","page");
+    };
+    await tab(0);await page.getByRole("button",{name:"阅读此页漫画",exact:true}).click();const comic=page.frameLocator("iframe[title='固定漫画阅读']");await expect(comic.locator("img")).toHaveCount(2);await expect(comic.locator(".balloon")).toContainText("为什么没有署名");expect(await comic.locator("img").first().evaluate((e:any)=>e.complete&&e.naturalWidth>100)).toBe(true);await page.bringToFront();await page.getByRole("button",{name:"导出离线漫画",exact:true}).focus();await expect(page.getByRole("button",{name:"导出离线漫画",exact:true})).toBeFocused();await page.getByRole("button",{name:"导出离线漫画",exact:true}).click();await expect(page.getByRole("status")).toContainText("已按固定修订导出",{timeout:120000});const file=(await readdir(exports)).find(f=>f.endsWith(".html"))!;expect(await readFile(path.join(exports,file),"utf8")).toContain("data:image/png;base64");await tab(2);await page.getByRole("button",{name:"检查阅读顺序与缺图",exact:true}).click();await expect(page.getByLabel("固定依据")).toContainText("明确阅读顺序");
     const close = page.getByRole("button", { name: "关闭依据" });
     if (await close.count()) await close.click();
     await tab(config.tabs.length - 1);
