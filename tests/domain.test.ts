@@ -1,0 +1,13 @@
+import {test} from "node:test";
+import assert from "node:assert/strict";
+import {scenario,range,wav,sha,base,sourceRef,original} from "./support/scenario.ts";
+import {validate,clone,canonical} from "../src/domain/model.ts";
+import {checkLayout,renderComic} from "../src/domain/professional.ts";
+test("左右阅读方向保持显式分格序号",()=>{const p=scenario();p.pages[0].direction="rtl";p.panels.reverse();validate(p);assert.deepEqual(checkLayout(p).reading_order[0].panel_ids,["panel-one","panel-two"]);assert.equal(checkLayout(p).reading_order[0].direction,"rtl");});
+test("分格和气泡越界均拒绝",()=>{for(const field of ["panels","balloons"]){const p=scenario();p[field][0].width=1;assert.throws(()=>validate(p));}});
+test("同页阅读序号重复拒绝",()=>{const p=scenario();p.panels[1].order=0;assert.throws(()=>validate(p));});
+test("孤立页面和气泡引用拒绝",()=>{for(const edit of [(p:any)=>p.panels[0].page_id="missing",(p:any)=>p.balloons[0].panel_id="missing"]){const p=scenario();edit(p);assert.throws(()=>validate(p));}});
+test("未知图像如实保留示意与缺项",async()=>{const p=scenario();assert.equal(checkLayout(p).missing_art_panel_ids.length,2);const html=await renderComic(p,[],()=>{throw Error("不应读取网络");});assert.match(html,/示意格/);assert.ok(!/https?:\/\//.test(html));});
+test("图像和意见不会因为替换而自动解决",()=>{const p=scenario();p.notes[0].asset_sha256="a".repeat(64);p.panels[0].asset_source_index=1;validate(p);assert.equal(p.notes[0].status,"open");assert.equal(checkLayout(p).fixed_image_notes[0].asset_sha256,"a".repeat(64));});
+test("解决局部意见需要保留理由",()=>{const p=scenario();p.notes[0].status="resolved";assert.throws(()=>validate(p));p.notes[0].resolution="按原意见准备第二版供审阅。";validate(p);});
+test("对白及标题在离线页面转义",async()=>{const p=scenario();p.balloons[0].text="<img onerror=alert(1)>";const html=await renderComic(p,[],()=>{});assert.match(html,/&lt;img/);assert.ok(!html.includes("<img onerror"));});
