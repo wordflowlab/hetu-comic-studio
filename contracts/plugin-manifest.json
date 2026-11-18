@@ -9,7 +9,7 @@
   },
   "description": {
     "zh-CN": "把故事组织为页、格、阅读顺序与对白，关联实际图像并导出可阅读漫画。",
-    "en": "Persistent creative engineering through external Agents and Hetu public SDK."
+    "en": "Arrange comic pages, panels, balloons and fixed images, then export readable offline comics."
   },
   "license": "Apache-2.0",
   "work_kinds": [
