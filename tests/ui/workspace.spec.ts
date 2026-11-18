@@ -151,6 +151,12 @@ test("真实Electron审阅、专业操作、导出、冲突保留与关闭重开
         });
         for (const [viewIndex, viewName] of config.tabs.entries()) {
           await tab(viewIndex);
+          if(viewIndex===0){
+            const comic=page.frameLocator("iframe[title='固定漫画阅读']");
+            await expect(comic.locator("img")).toHaveCount(2);
+            await expect.poll(()=>comic.locator("img").evaluateAll((images:any[])=>images.every(image=>image.complete&&image.naturalWidth>100))).toBe(true);
+            await expect(comic.locator(".balloon")).toContainText("为什么没有署名");
+          }
           await page.screenshot({
             path: info.outputPath(
               theme + "-" + width + "-view-" + viewIndex + ".png",
