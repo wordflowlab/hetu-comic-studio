@@ -14,7 +14,7 @@ const error=(r:any)=>r.error?.code??r.data?.result?.error?.code;
 test("正式机器入口全动作、固定成果、恢复与热插拔",{timeout:1200000},async t=>{
  const c=await start();let serial=0;const key=()=>"machine-"+(++serial);const files:any[]=[];
  const artifact=async(action:string,r:any,args:any={})=>{let offset=0,expected:string|undefined,total:number|undefined;const chunks:Buffer[]=[];
- do{const v=await c.invoke(action,{...selection(r),...args,offset,max_bytes:65536});const b=Buffer.from(v.base64,"base64");assert.equal(v.offset,offset);assert.equal(sha(b),v.chunk_sha256);expected??=v.sha256;total??=v.total_bytes;assert.equal(v.sha256,expected);chunks.push(b);if(v.next_offset===null)break;assert.equal(v.next_offset,offset+b.length);offset=v.next_offset;}while(offset<32*1024*1024);
+ do{const v=await c.invoke(action,{...selection(r),...args,offset,max_bytes:8192});const b=Buffer.from(v.base64,"base64");assert.equal(v.offset,offset);assert.equal(sha(b),v.chunk_sha256);expected??=v.sha256;total??=v.total_bytes;assert.equal(v.sha256,expected);chunks.push(b);if(v.next_offset===null)break;assert.equal(v.next_offset,offset+b.length);offset=v.next_offset;}while(offset<32*1024*1024);
  const bytes=Buffer.concat(chunks);assert.equal(bytes.length,total);assert.equal(sha(bytes),expected);return bytes;};
  try{
  t.diagnostic(c.directory);assert.equal(c.cap.access_mode,"open");
@@ -40,7 +40,7 @@ test("正式机器入口全动作、固定成果、恢复与热插拔",{timeout:
  }
  if(slug==="comic-studio"){
  assert.deepEqual((await c.invoke("check_layout",selection(r))).missing_art_panel_ids,[]);
- assert.match((await c.invoke("render_page",{...selection(r),page_id:"page-one"})).html,/data:image\/png;base64/);
+ assert.match((await artifact("render_page",r,{page_id:"page-one"})).toString(),/data:image\/png;base64/);
  assert.equal((await c.invoke("locate_panel",{...selection(r),panel_id:"panel-one"})).ranges[0].quote,original);
  const html=await artifact("export_comic",r);assert.match(html.toString(),/这封信/);assert.ok(!/https?:\/\//.test(html.toString()));files.push({name:"漫画.html",bytes:html});
  }
