@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-18",
+  "plugin_id": "org.wordflowlab.comic-studio",
+  "package_sha256": "7e18dc9956a2678171c5692eef3c512315e0a40447d507c1bb292214fe284420",
+  "host_version": "hetu 0.12.2",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "tabs": [
+    "页面与分格",
+    "对白气泡",
+    "阅读检查",
+    "局部意见",
+    "接续创作"
+  ],
+  "empty_state": true,
+  "professional_actions": true,
+  "artifact_files": [
+    "漫画.html"
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "widths": [
+    1360,
+    760
+  ],
+  "reduced_transparency": true,
+  "CAS_preserves_input": true,
+  "explicit_rebase": true,
+  "close_reopen": true,
+  "dirty_buffer_restore": true,
+  "page_errors": [],
+  "limits": [
+    "原生窗口材质、系统输入法及Windows/Linux未由本测试证明"
+  ]
+}
